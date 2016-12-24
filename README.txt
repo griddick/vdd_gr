@@ -1,3 +1,19 @@
+Attempt to upgrade vdd to PHP 7 using the latest xenial Ubuntu LTS Like AJF, I started by tryng to install and run VDD but came up across a number of additional obstacles.
+
+The biggest is that the PPA for the distribution of PHP has changed format - which now pretty much breaks everything. I started by trying to patch it, but came to the conclusion that I was patching a sinking ship. I decided that it would be a good time to switch to PHP7 and Ubuntu 16.04.
+
+This patch is my first attempt at doing so. I had never used chef before starting down this road so there are probably some nasty cludges in there but I have been using VDD for a long time and really appreciate the work that everyone has done in maintaining it, so I thought that I might give a little back.
+
+I am still suffering from a recent problem with the Debian dbconf which is supposed to setup phpmyadmin automatically. It does not work because the mysql socket file is not in the "usual" location.
+
+So after cloning, installing an vagrant up'ing the machine as usual, you have to create the phpmyadmin database manually by connecting to the phpmyadmin page and following the link to fix the problems. A "phpmyadmin" user needs to be created and granted rights to the phpmyadmin database to keep all quiet.
+
+For the latest drupal 8, after sshing to the machine, the following commands need to be run: mkdir .drush cp /usr/local/bin/drush-master/aliases.drushrc.php ~/.drush/ cd ~/sites/drupal8 git clone --branch 8.2.x https://git.drupal.org/project/drupal.git . composer install drush @drupal8 si standard -y
+
+I have only tested this on my linux machine, not sure if it will work in a windows environment. Its far from pretty but it does allow me to get a machine up and running almost automatically. Hopefully this well help the more informed and experienced out there build a more stable D8 solution to move forwards on.
+
+
+
 Vagrant Drupal Development
 --------------------------
 
