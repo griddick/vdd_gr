@@ -19,9 +19,9 @@
 #
 
 require 'chef/mixin/shell_out'
-
 include Chef::Mixin::ShellOut
-include Windows::Helper
+include Opscode::IIS::Helper
+include Opscode::IIS::Processors
 
 # Support whyrun
 def whyrun_supported?
@@ -31,73 +31,93 @@ end
 # appcmd syntax for adding modules
 # appcmd add module /name:string /type:string /preCondition:string
 action :add do
-  unless @current_resource.exists
-    converge_by("add IIS module #{@new_resource.module_name}") do
-      cmd = "#{appcmd} add module /module.name:\"#{@new_resource.module_name}\""
+  if !@current_resource.exists
+    converge_by("add IIS module #{new_resource.module_name}") do
+      cmd = "#{appcmd(node)} add module /module.name:\"#{new_resource.module_name}\""
 
-      if @new_resource.application
-        cmd << " /app.name:\"#{@new_resource.application}\""
+      if new_resource.application
+        cmd << " /app.name:\"#{new_resource.application}\""
       end
 
-      if @new_resource.type
-        cmd << " /type:\"#{@new_resource.type}\""
+      cmd << " /type:\"#{new_resource.type}\"" if new_resource.type
+
+      if new_resource.precondition
+        cmd << " /preCondition:\"#{new_resource.precondition}\""
       end
 
-      if @new_resource.precondition
-        cmd << " /preCondition:\"#{@new_resource.precondition}\""
-      end
+      shell_out!(cmd, returns: [0, 42])
 
-      shell_out!(cmd, {:returns => [0,42]})
-
-      Chef::Log.info("#{@new_resource} added module '#{@new_resource.module_name}'")
+      Chef::Log.info("#{new_resource} added module '#{new_resource.module_name}'")
     end
   else
-    Chef::Log.debug("#{@new_resource} module already exists - nothing to do")
+    Chef::Log.debug("#{new_resource} module already exists - nothing to do")
   end
 end
 
 action :delete do
   if @current_resource.exists
-    converge_by("delete IIS module #{@new_resource.module_name}") do
-
-      cmd = "#{appcmd} delete module /module.name:\"#{@new_resource.module_name}\""
-      if @new_resource.application
-        cmd << " /app.name:\"#{@new_resource.application}\""
+    converge_by("delete IIS module #{new_resource.module_name}") do
+      cmd = "#{appcmd(node)} delete module /module.name:\"#{new_resource.module_name}\""
+      if new_resource.application
+        cmd << " /app.name:\"#{new_resource.application}\""
       end
 
-      shell_out!(cmd, {:returns => [0,42]})
+      shell_out!(cmd, returns: [0, 42])
     end
 
-    Chef::Log.info("#{@new_resource} deleted")
+    Chef::Log.info("#{new_resource} deleted")
   else
-    Chef::Log.debug("#{@new_resource} module does not exist - nothing to do")
+    Chef::Log.debug("#{new_resource} module does not exist - nothing to do")
+  end
+end
+
+# appcmd syntax for installing native modules
+# appcmd install module /name:string /add:string(true|false) /image:string
+action :install do
+  if !@current_resource.exists
+    converge_by("install IIS module #{new_resource.module_name}") do
+      cmd = "#{appcmd(node)} install module /name:\"#{new_resource.module_name}\""
+      cmd << " /add:\"#{new_resource.add}\"" unless new_resource.add.nil?
+      cmd << " /image:\"#{new_resource.image}\"" if new_resource.image
+      cmd << " /preCondition:\"#{new_resource.precondition}\"" if new_resource.precondition
+
+      shell_out!(cmd, returns: [0, 42])
+
+      Chef::Log.info("#{new_resource} installed module '#{new_resource.module_name}'")
+    end
+  else
+    Chef::Log.debug("#{new_resource} module already exists - nothing to do")
+  end
+end
+
+# appcmd syntax for uninstalling native modules
+# appcmd uninstall module <name>
+action :uninstall do
+  if @current_resource.exists
+    converge_by("uninstall IIS module #{new_resource.module_name}") do
+      cmd = "#{appcmd(node)} uninstall module \"#{new_resource.module_name}\""
+
+      shell_out!(cmd, returns: [0, 42])
+    end
+
+    Chef::Log.info("#{new_resource} uninstalled module '#{new_resource.module_name}'")
+  else
+    Chef::Log.debug("#{new_resource} module does not exists - nothing to do")
   end
 end
 
 def load_current_resource
-  @current_resource = Chef::Resource::IisModule.new(@new_resource.name)
-  @current_resource.module_name(@new_resource.module_name)
-
-  if @new_resource.application
-    cmd = shell_out("#{appcmd} list module /module.name:\"#{@new_resource.module_name}\" /app.name:\"#{@new_resource.application}\"")
-  else
-    cmd = shell_out("#{appcmd} list module /module.name:\"#{@new_resource.module_name}\"")
-  end
+  @current_resource = Chef::Resource::IisModule.new(new_resource.name)
+  @current_resource.module_name(new_resource.module_name)
+  cmd = if new_resource.application
+          shell_out("#{appcmd(node)} list module /module.name:\"#{new_resource.module_name}\" /app.name:\"#{new_resource.application}\"")
+        else
+          shell_out("#{appcmd(node)} list module /module.name:\"#{new_resource.module_name}\"")
+        end
 
   # 'MODULE "Module Name" ( type:module.type, preCondition:condition )'
   # 'MODULE "Module Name" ( native, preCondition:condition )'
 
-  Chef::Log.debug("#{@new_resource} list module command output: #{cmd.stdout}")
-  if cmd.stdout.empty?
-    @current_resource.exists = false
-  else
-    @current_resource.exists = true
-  end
-end
-
-private
-def appcmd
-  @appcmd ||= begin
-    "#{node['iis']['home']}\\appcmd.exe"
-  end
+  Chef::Log.debug("#{new_resource} list module command output: #{cmd.stdout}")
+  @current_resource.exists = !cmd.stdout.empty?
 end

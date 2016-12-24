@@ -2,9 +2,9 @@ package "git" do
   action :install
 end
 
-template "/home/vagrant/.gitconfig" do
+template "/home/ubuntu/.gitconfig" do
   source "gitconfig.erb"
-  owner "vagrant"
-  group "vagrant"
+  owner "ubuntu"
+  group "ubuntu"
   mode "0644"
 end

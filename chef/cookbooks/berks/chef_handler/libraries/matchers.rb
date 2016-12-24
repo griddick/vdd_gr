@@ -3,7 +3,7 @@
 # Cookbook Name:: chef_handler
 # Library:: matchers
 #
-# Copyright 2014, Chef Software, Inc.
+# Copyright 2014-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,15 @@
 #
 
 if defined?(ChefSpec)
+  chefspec_version = Gem.loaded_specs['chefspec'].version
+  define_method = if chefspec_version < Gem::Version.new('4.1.0')
+                    ChefSpec::Runner.method(:define_runner_method)
+                  else
+                    ChefSpec.method(:define_matcher)
+                  end
+
+  define_method.call :chef_handler
+
   def enable_chef_handler(resource_name)
     ChefSpec::Matchers::ResourceMatcher.new(:chef_handler, :enable, resource_name)
   end

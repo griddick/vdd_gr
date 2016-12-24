@@ -10,15 +10,15 @@ end
 
 directory "/var/www" do
   if nfs == 0
-    owner "vagrant"
-    group "vagrant"
+    owner "ubuntu"
+    group "ubuntu"
   end
 end
 
-# Add vagrant to www-data group
+# Add ubuntu to www-data group
 group "www-data" do
   action :modify
-  members "vagrant"
+  members "ubuntu"
   append true
 end
 
@@ -27,7 +27,7 @@ file File.join(File.dirname(node['apache']['docroot_dir']), 'index.html') do
   action :delete
 end
 
-link "/home/vagrant/sites" do
+link "/home/ubuntu/sites" do
   to "/var/www"
 end
 
@@ -35,8 +35,8 @@ web_app "localhost" do
   template "localhost.conf.erb"
 end
 
-node.default["apache"]["user"] = "vagrant"
-node.default["apache"]["group"] = "vagrant"
+node.default["apache"]["user"] = "ubuntu"
+node.default["apache"]["group"] = "ubuntu"
 
 modules = [
   "cgi",

@@ -1,9 +1,9 @@
 #
 # Author::  Christo De Lange (<opscode@dldinternet.com>)
-# Cookbook Name:: php
+# Cookbook:: php
 # Recipe:: ini
 #
-# Copyright 2011, Opscode, Inc.
+# Copyright:: 2011-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@
 #
 
 template "#{node['php']['conf_dir']}/php.ini" do
-	source node['php']['ini']['template']
-	cookbook node['php']['ini']['cookbook']
-	unless platform?('windows')
-		owner 'root'
-		group 'root'
-		mode '0644'
-	end
-	variables(:directives => node['php']['directives'])
+  source node['php']['ini']['template']
+  cookbook node['php']['ini']['cookbook']
+  unless platform?('windows')
+    owner 'root'
+    group node['root_group']
+    mode '0644'
+  end
+  variables(directives: node['php']['directives'])
 end

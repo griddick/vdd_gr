@@ -3,3 +3,12 @@ memory_limit = 128M
 html_errors = On
 display_errors = On
 sendmail_path = /usr/local/bin/catchmail
+
+[mysql]  
+mysql.default_socket="/var/run/mysql-default/mysqld.sock"
+
+[mysqli]
+mysqli.default_socket="/var/run/mysql-default/mysqld.sock"
+
+[pdo_mysql]
+pdo_mysql.default_socket="/var/run/mysql-default/mysqld.sock"

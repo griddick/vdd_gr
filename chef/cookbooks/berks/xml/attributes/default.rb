@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: xml
-# Recipe:: default
+# Cookbook:: xml
+# Attributes:: default
 #
-# Copyright 2010-2013, Opscode, Inc.
+# Copyright:: 2009-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,11 +21,16 @@ default['xml']['compiletime'] = false
 
 case node['platform_family']
 when 'rhel', 'fedora', 'suse'
-  default['xml']['packages'] = %w[libxml2-devel libxslt-devel]
-when 'ubuntu', 'debian'
-  default['xml']['packages'] = %w[libxml2-dev libxslt-dev]
-when 'freebsd', 'arch'
-  default['xml']['packages'] = %w[libxml2 libxslt]
+  default['xml']['packages'] = %w(libxml2-devel libxslt-devel zlib-devel)
+when 'debian'
+  default['xml']['packages'] = %w(libxml2-dev libxslt-dev zlib1g-dev)
+when 'freebsd'
+  default['xml']['packages'] = %w(libxml2 libxslt)
+when 'mac_os_x'
+  default['xml']['packages'] = %w(libxml2)
+else
+  default['xml']['packages'] = []
 end
 
-default['xml']['nokogiri']['use_system_libraries'] = true
+default['xml']['nokogiri']['use_system_libraries'] = false
+default['xml']['nokogiri']['version'] = nil

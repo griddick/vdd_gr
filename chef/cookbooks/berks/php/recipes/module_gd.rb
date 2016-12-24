@@ -1,10 +1,10 @@
 #
-# Author::  Joshua Timberman (<joshua@opscode.com>)
-# Author::  Seth Chisamore (<schisamo@opscode.com>)
-# Cookbook Name:: php
+# Author::  Joshua Timberman (<joshua@chef.io>)
+# Author::  Seth Chisamore (<schisamo@chef.io>)
+# Cookbook:: php
 # Recipe:: module_gd
 #
-# Copyright 2009-2011, Opscode, Inc.
+# Copyright:: 2009-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ pkg = value_for_platform(
     el5_range => 'php53-gd',
     'default' => 'php-gd'
   },
-  'default' => 'php5-gd'
+  'freebsd' => {
+    'default' => 'php56-gd'
+  },
+  'default' => node['php']['gd']['package']
 )
 
 package pkg do

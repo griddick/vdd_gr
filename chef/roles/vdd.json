@@ -2,6 +2,9 @@
   "name": "vdd",
   "env_run_lists": {},
   "default_attributes": {
+    "apache": {
+      "mpm": "prefork"
+     },
     "mysql": {
       "server_root_password": "root",
       "server_repl_password": "root",
@@ -14,16 +17,13 @@
   "run_list": [
     "recipe[apt]",
     "recipe[apache2]",
-    "recipe[mysql::client]",
-    "recipe[mysql::server]",
     "recipe[vdd::apache]",
     "recipe[vdd::graphviz]",
     "recipe[vdd::vdd_sites]",
     "recipe[vdd::php]",
+    "recipe[vdd::phpmyadmin]",
     "recipe[vdd::uploadprogress]",
     "recipe[vdd::mailcatcher]",
-    "recipe[vdd::phpmyadmin]",
-    "recipe[vdd::mysql]",
     "recipe[vdd::xdebug]",
     "recipe[vdd::git]",
     "recipe[vdd::webgrind]",

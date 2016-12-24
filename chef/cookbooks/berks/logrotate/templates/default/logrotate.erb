@@ -5,54 +5,15 @@
 <%- if @frequency %>
   <%= @frequency %>
 <%- end %>
-<%- if @dateformat %> 
-  dateformat <%= @dateformat %>
+<%- @configurables.each do |name, value| %>
+  <%= "#{name} #{value}" %>
 <%- end %>
-<%- if @size %>
-  size <%= @size %>
-<%- end %>
-<%- if @minsize %>
-  minsize <%= @minsize %>
-<%- end %>
-<%- if @maxsize %>
-  maxsize <%= @maxsize %>
-<%- end %>
-<%- if @su %>
-  su <%= @su %>
-<%- end %>
-<%- if @rotate %>
-  rotate <%= @rotate %>
-<%- end %>
-<%- if @create %>
-  create <%= @create %>
-<%- end %>
-<%- if @olddir %>
-  olddir <%= @olddir %>
-<%- end %>
-<% @options.each do |o| -%>
+<% @directives.each do |o| -%>
   <%= o %>
 <% end -%>
-<%- if @sharedscripts %>
-  sharedscripts
-<%- end %>
-<%- unless @postrotate.empty? %>
-  postrotate
-<%= @postrotate %>
-  endscript
-<%- end %>
-<%- unless @prerotate.empty? %>
-  prerotate
-<%= @prerotate %>
-  endscript
-<%- end %>
-<%- unless @firstaction.empty? %>
-  firstaction
-<%= @firstaction %>
-  endscript
-<%- end %>
-<%- unless @lastaction.empty? %>
-  lastaction
-<%= @lastaction %>
+<%- @scripts.each do |script_name, script| %>
+  <%= script_name %>
+    <%= script %>
   endscript
 <%- end %>
 }

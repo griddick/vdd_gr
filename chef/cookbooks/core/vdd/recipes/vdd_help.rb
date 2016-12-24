@@ -11,8 +11,8 @@ end
 template File.join(node['apache']['docroot_dir'], 'index.html') do
   source "vdd_help.html.erb"
   if nfs == 0
-    owner "vagrant"
-    group "vagrant"
+    owner "ubuntu"
+    group "ubuntu"
   end
   mode 00644
   variables(

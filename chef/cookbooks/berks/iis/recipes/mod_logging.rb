@@ -1,9 +1,9 @@
 #
-# Author:: Seth Chisamore (<schisamo@opscode.com>)
+# Author:: Seth Chisamore (<schisamo@chef.io>)
 # Cookbook Name:: iis
 # Recipe:: mod_logging
 #
-# Copyright 2011, Opscode, Inc.
+# Copyright 2011-2016, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
 # limitations under the License.
 #
 
-include_recipe "iis"
+include_recipe 'iis'
 
-if Opscode::IIS::Helper.older_than_windows2008r2?
-  feature = 'Web-Http-Logging'
-else
-  feature = 'IIS-CustomLogging'
-end
+feature = if Opscode::IIS::Helper.older_than_windows2008r2?
+            'Web-Http-Logging'
+          else
+            'IIS-CustomLogging'
+          end
 
 windows_feature feature do
   action :install

@@ -1,5 +1,6 @@
+include Opscode::Aws::S3
 
-use_inline_resources if defined?(use_inline_resources)
+use_inline_resources
 
 def whyrun_supported?
   true
@@ -21,17 +22,20 @@ action :touch do
   do_s3_file(:touch)
 end
 
-
 def do_s3_file(resource_action)
-  version = Chef::Version.new(Chef::VERSION[/^(\d+\.\d+\.\d+)/, 1])
-  if version.major < 11 || (version.major == 11 && version.minor < 6)
-    Chef::Log.warn("In order to automatically use etag support to prevent re-downloading files from s3, you must upgrade to at least chef 11.6.0")
+  md5s_match = false
+
+  s3url = s3_obj.presigned_url(:get, expires_in: 300).gsub(%r{https://([\w\.\-]*)\.\{1\}s3.amazonaws.com:443}, 'https://s3.amazonaws.com:443/\1') # Fix for ssl cert issue
+  Chef::Log.debug("Using S3 URL #{s3url}")
+
+  if resource_action == :create
+    if compare_md5s(s3_obj, new_resource.path)
+      Chef::Log.info("Remote and local files appear to be identical, skipping #{resource_action} operation.")
+      md5s_match = true
+    else
+      Chef::Log.info("Remote and local files do not match, running #{resource_action} operation.")
+    end
   end
-
-  remote_path = new_resource.remote_path
-  remote_path.sub!(/^\/*/, "")
-
-  s3url = RightAws::S3Interface.new(new_resource.aws_access_key_id, new_resource.aws_secret_access_key).get_link(new_resource.bucket, remote_path)
 
   remote_file new_resource.name do
     path new_resource.path
@@ -41,19 +45,20 @@ def do_s3_file(resource_action)
     mode new_resource.mode
     checksum new_resource.checksum
     backup new_resource.backup
-    if node['platform_family'] == "windows"
+    headers new_resource.headers
+    use_etag new_resource.use_etag
+    use_last_modified new_resource.use_last_modified
+    atomic_update new_resource.atomic_update
+    force_unlink new_resource.force_unlink
+    manage_symlink_source new_resource.manage_symlink_source
+    sensitive new_resource.sensitive
+    retries new_resource.retries
+    retry_delay new_resource.retry_delay
+    if node['platform_family'] == 'windows'
       inherits new_resource.inherits
       rights new_resource.rights
     end
     action resource_action
-
-    if version.major > 11 || (version.major == 11 && version.minor >= 6)
-      headers new_resource.headers
-      use_etag new_resource.use_etag
-      use_last_modified new_resource.use_last_modified
-      atomic_update new_resource.atomic_update
-      force_unlink new_resource.force_unlink
-      manage_symlink_source new_resource.manage_symlink_source
-    end
+    not_if { md5s_match }
   end
 end
