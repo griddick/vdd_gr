@@ -39,8 +39,13 @@ the source code.
   1. Install VirtualBox
      https://www.virtualbox.org/wiki/Downloads
 
-  2. Install Vagrant
+  2. Install Vagrant (and vagrant-hostupdater)
      http://docs.vagrantup.com/v2/installation/index.html
+     
+     2.1 After that, install the plugin [vagrant-hostsupdater](https://github.com/cogitatio/vagrant-hostsupdater)
+     ```
+     vagrant plugin install vagrant-hostsupdater
+     ```
 
   3. Prepare VDD source code
      Download and unpack VDD source code and place it inside your home
